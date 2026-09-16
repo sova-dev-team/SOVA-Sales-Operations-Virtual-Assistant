@@ -1,0 +1,48 @@
+name: ai-sales-operations
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ai_sales_ops
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_sales_ops"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+    environment:
+      SERVICE_NAME: ai-sales-operations-api
+      APP_VERSION: 0.1.0
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/ai_sales_ops
+      JWT_SECRET: ${JWT_SECRET:-development-only-change-this-secret-before-deployment-0000000000000000}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+      FOLLOW_UP_INTERVAL_DAYS: ${FOLLOW_UP_INTERVAL_DAYS:-7}
+      POWER_BI_ENABLED: ${POWER_BI_ENABLED:-false}
+      POWER_BI_WORKSPACE_ID: ${POWER_BI_WORKSPACE_ID:-}
+      POWER_BI_REPORT_ID: ${POWER_BI_REPORT_ID:-}
+      POWER_BI_TENANT_ID: ${POWER_BI_TENANT_ID:-}
+      POWER_BI_CLIENT_ID: ${POWER_BI_CLIENT_ID:-}
+      POWER_BI_CLIENT_SECRET: ${POWER_BI_CLIENT_SECRET:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+volumes:
+  postgres_data:
