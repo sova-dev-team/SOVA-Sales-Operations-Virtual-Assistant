@@ -45,3 +45,20 @@ async def test_oversized_request_id_is_replaced() -> None:
     resolved_request_id = response.headers["x-request-id"]
     assert resolved_request_id != oversized_request_id
     UUID(resolved_request_id)
+
+
+@pytest.mark.asyncio
+async def test_cors_allows_configured_frontend_origin() -> None:
+    transport = httpx.ASGITransport(app=create_app())
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.options(
+            "/api/v1/auth/login",
+            headers={
+                "Origin": "http://localhost:5173",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"

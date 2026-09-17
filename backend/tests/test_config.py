@@ -14,6 +14,15 @@ def test_settings_can_be_overridden_for_another_environment(monkeypatch) -> None
     assert settings.environment == "test"
 
 
+def test_settings_define_local_frontend_cors_origins() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.cors_origins == [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+
+
 @pytest.mark.asyncio
 async def test_health_uses_explicit_application_settings() -> None:
     transport = httpx.ASGITransport(

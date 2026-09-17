@@ -4,15 +4,14 @@ Status values: `done`, `in progress`, `blocked`, and `pending`.
 
 ## Current delivery order
 
-The project is temporarily **backend-first**. Frontend implementation and Figma
-work are intentionally deferred until the FastAPI contract, database migrations,
-business rules, and test fixtures are stable. This does not remove the frontend
-scope; it changes sequencing so the later React work consumes a proven contract.
+The backend contract and vertical slices were completed first. The supplied
+UX/UI source has now been integrated as the React client and consumes that
+contract through a validated API layer.
 
 ```text
 Phase 0 -> Phase 1 -> Phase 3 backend foundation -> Phase 4–8 backend vertical slices
-         -> Phase 9 Power BI backend integration -> Phase 10 backend hardening
-         -> Phase 2 Figma/FE -> release
+         -> Phase 9 Power BI integration -> Phase 10 hardening
+         -> Phase 2 UX/UI integration -> release
 ```
 
 ## Phase 0 — Scope and vocabulary
@@ -37,94 +36,93 @@ Phase 0 -> Phase 1 -> Phase 3 backend foundation -> Phase 4–8 backend vertical
 
 ## Phase 2 — UX/UI in Figma
 
-**Status:** deferred by decision
+**Status:** done (supplied UX/UI handoff integrated)
 
-The design and frontend scope remains accepted, but execution is deferred until
-the backend contract, data rules, and release hardening are complete. UX/UI is
-the final implementation phase by decision. The copy-paste design brief is in
-`docs/product/figma-ux-ui-prompt.md`.
+The supplied UX/UI source is implemented in `frontend/`. The original design
+brief remains in `docs/product/figma-ux-ui-prompt.md`.
 
-- [ ] Information architecture and navigation.
-- [ ] User flows for import, customer management, analytics, email review, and tickets.
-- [ ] Wireframes for all MVP screens.
-- [ ] Design tokens and reusable component variants.
-- [ ] High-fidelity desktop dashboard and responsive states.
-- [ ] Clickable prototype and developer handoff.
+- [x] Information architecture and role-aware navigation.
+- [x] User flows for import, customer management, analytics, email review, and tickets.
+- [x] Reusable layout and component variants from the supplied UX/UI.
+- [x] Desktop dashboard and responsive navigation states.
+- [x] Developer handoff integrated into the application repository.
 
 ## Phase 3 — Technical foundation
 
-**Status:** done (backend scope; FE deferred)
+**Status:** done
 
 - [x] Monorepo structure, environment templates, and Docker Compose.
 - [x] FastAPI app factory, settings, health check, logging, and error middleware.
 - [x] SQLAlchemy session, Alembic scaffold, and backend test foundations.
-- [ ] React/Vite strict TypeScript setup with Tailwind CSS and shadcn/ui, routing, query client, and API client (deferred with Phase 2).
+- [x] React/Vite strict TypeScript setup with Tailwind CSS, query client, validated API client, and protected application shell.
 - [x] Backend formatter, linter, type check, test, and migration-check scripts.
 
 ## Phase 4 — Authentication and access
 
-**Status:** done (backend scope; UI deferred)
+**Status:** done
 
 - [x] User model and migrations.
 - [x] Scrypt password hashing, access/refresh tokens, logout, and session expiry.
 - [x] Admin/Staff authorization dependencies and permission tests.
-- [ ] Login, protected routes, role-based navigation, and User management UI.
+- [x] Login, protected application shell, role-based navigation, and User management UI.
 
 ## Phase 5 — Customer data and import
 
-**Status:** done (backend scope; UI deferred)
+**Status:** done
 
 - [x] Customer, Product, Interest, and Interaction models.
 - [x] Customer CRUD, search, filters, sorting, pagination, and ownership.
 - [x] CSV/XLSX preview, normalization, validation, duplicate detection, and transaction.
 - [x] Import errors, correction flow, download-errors action, and tests.
+- [x] Customer list/detail/create/edit, interaction history, and import UI.
 
 ## Phase 6 — Operational analytics
 
-**Status:** done (backend scope; UI deferred)
+**Status:** done
 
 - [x] KPI definitions and query implementations.
 - [x] Customer, product, interaction, and Follow-up summaries.
-- [ ] React KPI cards, charts, filters, table, loading, empty, and error states.
+- [x] React KPI cards, charts, tables, loading, empty, and error states.
 - [x] Query indexes and correctness tests.
 
 ## Phase 7 — AI Email Drafts
 
-**Status:** done (backend scope; UI deferred)
+**Status:** done
 
 - [x] AI Provider interface and deterministic fake adapter.
 - [x] Vietnamese/English prompt templates and structured output.
 - [x] Minimized context builder and human-review state machine.
 - [x] Email Draft state machine and audit events.
-- [ ] Composer, regenerate, edit, review, approve, reject, and history UI.
+- [x] Composer, edit, review, approve, reject, and history UI.
 
 ## Phase 8 — Support and audit
 
-**Status:** done (backend scope; UI deferred)
+**Status:** done
 
 - [x] Support Ticket and comment models.
 - [x] Status, priority, category, assignment, and permission rules.
-- [ ] Ticket list/detail/timeline UI.
+- [x] Ticket list/detail/timeline UI.
 - [x] Audit capture, redaction, filtering, and Admin viewer API.
 
 ## Phase 9 — Power BI
 
-**Status:** done (backend adapter; React embed deferred)
+**Status:** done
 
 - [x] Semantic model and report measures documented.
 - [x] Power BI configuration seam and short-lived embed-config endpoint.
-- [ ] React `powerbi-client-react` integration and token refresh.
-- [ ] Loading, authorization failure, expiry, and fallback states.
+- [x] React `powerbi-client-react` integration and embed-config refresh.
+- [x] Loading, authorization failure, expiry, and fallback states.
 - [x] Synthetic-data-only public demo path.
 
 ## Phase 10 — Hardening and portfolio delivery
 
-**Status:** done (backend scope; release packaging deferred until UX/UI)
+**Status:** done (deployment artifacts remain pending)
 
 - [x] Backend unit/integration tests and critical API journeys.
 - [x] Security checks for auth, uploads, SQL scope, AI context, and Power BI secrets.
 - [x] Dockerfile, migration checks, CI quality gates, and reproducible lockfile.
 - [x] Backend README, API docs, diagrams, and changelog.
+- [x] Frontend quality gates, container, API contract generation, and local documentation.
 - [ ] Production deployment, screenshots, and demo recording after UX/UI.
 
 ## Quality gates

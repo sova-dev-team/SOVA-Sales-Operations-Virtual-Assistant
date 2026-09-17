@@ -1,0 +1,47 @@
+{
+  "name": "sova-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.34.3",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "oxlint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "generate:api": "openapi-typescript src/api/openapi.json -o src/api/generated.ts && prettier --write src/api/openapi.json src/api/generated.ts"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.9.1",
+    "@tanstack/react-query": "^5.102.8",
+    "lucide-react": "^1.45.0",
+    "powerbi-client": "^2.24.1",
+    "powerbi-client-react": "^2.0.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.88.0",
+    "recharts": "^3.10.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "jsdom": "^30.0.1",
+    "openapi-typescript": "^7.13.0",
+    "oxlint": "^1.82.0",
+    "prettier": "^3.9.6",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^8.0.5",
+    "vitest": "^5.0.0"
+  }
+}

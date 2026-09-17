@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -43,6 +44,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         description=(
             "Internal API for customer operations, analytics, and AI-assisted email drafts."
         ),
+    )
+
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=resolved_settings.cors_origins,
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
+        expose_headers=["Content-Disposition", "X-Request-ID"],
     )
 
     application.dependency_overrides[get_settings] = lambda: resolved_settings

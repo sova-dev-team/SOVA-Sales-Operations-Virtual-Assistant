@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=30, ge=5, le=1440)
     refresh_token_expire_days: int = Field(default=7, ge=1, le=90)
     follow_up_interval_days: int = Field(default=7, ge=1, le=365)
+    cors_origins: list[str] = Field(
+        default_factory=lambda: ["http://localhost:5173", "http://127.0.0.1:5173"]
+    )
     power_bi_enabled: bool = False
     power_bi_workspace_id: str | None = None
     power_bi_report_id: str | None = None

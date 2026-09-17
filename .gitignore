@@ -19,6 +19,8 @@ htmlcov/
 # Frontend dependencies and build output (frontend is intentionally deferred)
 node_modules/
 frontend/dist/
+.pnpm-store/
+frontend/coverage/
 
 # Database migrations are reviewed source files and must be tracked.
 
