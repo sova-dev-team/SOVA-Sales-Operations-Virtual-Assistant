@@ -10,6 +10,8 @@ All notable changes to this project are documented here.
 
 ### Added
 
+- Streamlined CI quality and security gates covering backend, frontend,
+  and security audits (secrets, dependencies, and SAST).
 - FastAPI application factory with health endpoint and stable problem-details errors.
 - Request ID propagation, input validation, and HTTP request logging middleware.
 - Async SQLAlchemy engine/session factory, Alembic scaffold, and transactional seed runner.

@@ -1,0 +1,184 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend quality and migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685
+        env:
+          POSTGRES_DB: ai_sales_ops_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ai_sales_ops_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ai_sales_ops_ci
+      JWT_SECRET: ci-only-secret-that-is-never-used-outside-github-actions-000000000
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.12.1"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install locked dependencies
+        run: uv sync --frozen --extra dev
+
+      - name: Check formatting
+        run: uv run --frozen ruff format --check .
+
+      - name: Lint
+        run: uv run --frozen ruff check .
+
+      - name: Type check
+        run: uv run --frozen mypy app
+
+      - name: Run tests with coverage
+        run: >-
+          uv run --frozen pytest
+          --cov=app
+          --cov-fail-under=80
+          --cov-report=term-missing
+          --cov-report=xml:coverage.xml
+          --junitxml=test-results.xml
+          -q
+
+      - name: Upgrade PostgreSQL schema
+        run: uv run --frozen alembic upgrade head
+
+      - name: Detect missing migrations
+        run: uv run --frozen alembic check
+
+  frontend:
+    name: Frontend quality and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5
+        with:
+          version: 10.34.3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build production bundle
+        run: pnpm build
+
+  security:
+    name: Security audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Scan Git history for secrets
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.24.0/gitleaks_8.24.0_linux_x64.tar.gz | tar -xz -C /tmp
+          /tmp/gitleaks git --verbose
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.12.1"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Audit locked Python dependencies
+        working-directory: backend
+        run: |
+          uv export --frozen --no-dev --no-emit-project --no-hashes --output-file requirements-audit.txt
+          uvx --from pip-audit==2.10.1 pip-audit --requirement requirements-audit.txt --strict
+          rm -f requirements-audit.txt
+
+      - name: Scan Python source for insecure patterns
+        run: uvx bandit==1.9.4 -r backend/app -q -ll
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5
+        with:
+          version: 10.34.3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install locked frontend dependencies
+        run: pnpm --dir frontend install --frozen-lockfile
+
+      - name: Audit production frontend dependencies
+        run: pnpm --dir frontend audit --prod --audit-level=high

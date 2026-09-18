@@ -61,3 +61,5 @@ corepack pnpm build
 
 See [AGENTS.md](AGENTS.md) for the engineering conventions and
 [docs/implementation-plan.md](docs/implementation-plan.md) for phase status.
+The complete quality, integration, security, and dependency-update pipelines
+are documented in [docs/ci.md](docs/ci.md).
