@@ -156,10 +156,11 @@ jobs:
           cache-dependency-glob: backend/uv.lock
 
       - name: Audit locked Python dependencies
+        working-directory: backend
         run: |
-          uv export --directory backend --frozen --no-dev --no-emit-project --no-hashes --output-file backend/requirements-audit.txt
-          uvx --from pip-audit==2.10.1 pip-audit --requirement backend/requirements-audit.txt --strict
-          rm -f backend/requirements-audit.txt
+          uv export --frozen --no-dev --no-emit-project --no-hashes --output-file requirements-audit.txt
+          uvx --from pip-audit==2.10.1 pip-audit --requirement requirements-audit.txt --strict
+          rm -f requirements-audit.txt
 
       - name: Scan Python source for insecure patterns
         run: uvx bandit==1.9.4 -r backend/app -q -ll

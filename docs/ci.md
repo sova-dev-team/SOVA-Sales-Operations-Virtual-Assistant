@@ -33,9 +33,11 @@ Run the backend and frontend commands documented in the root `README.md`. For
 security checks:
 
 ```powershell
-uv export --directory backend --frozen --no-dev --no-emit-project --no-hashes --output-file backend/requirements-audit.txt
-uvx --from pip-audit==2.10.1 pip-audit --requirement backend/requirements-audit.txt --strict
-Remove-Item backend/requirements-audit.txt
+cd backend
+uv export --frozen --no-dev --no-emit-project --no-hashes --output-file requirements-audit.txt
+uvx --from pip-audit==2.10.1 pip-audit --requirement requirements-audit.txt --strict
+Remove-Item requirements-audit.txt
+cd ..
 uvx bandit==1.9.4 -r backend/app -q -ll
 corepack pnpm@10.34.3 --dir frontend audit --prod --audit-level=high
 ```
